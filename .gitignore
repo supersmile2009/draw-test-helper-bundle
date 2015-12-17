@@ -10,6 +10,12 @@
 !var/cache/.gitkeep
 !var/logs/.gitkeep
 
+# Cache and logs tests
+/Tests/fixtures/app/cache/*
+/Tests/fixtures/app/logs/*
+!Tests/fixtures/app/cache/.gitkeep
+!Tests/fixtures/app/logs/.gitkeep
+
 # Parameters
 /app/config/parameters.yml
 /app/config/parameters.ini
@@ -35,3 +41,6 @@
 
 # Composer PHAR
 /composer.phar
+
+# IDE
+.idea

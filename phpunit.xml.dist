@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit colors="false" bootstrap="autoload.php">
+    <php>
+        <server name="KERNEL_DIR" value="./Tests/fixtures/app" />
+    </php>
+    <testsuites>
+        <testsuite name="Nucleus Tests">
+            <file>./Tests/Helper/RequestHelperTest.php</file>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -1,0 +1,43 @@
+parameters:
+    database_name: test__draw_test_helper_bundle
+    locale: en
+
+framework:
+  secret: secret
+  router:
+    resource: %kernel.root_dir%/config/routing.yml
+  test: ~
+  session: ~
+  validation: { enable_annotations: true }
+
+sensio_framework_extra:
+  router:  { annotations: true }
+
+monolog:
+  handlers:
+    main:
+      type: stream
+      level: debug
+    console:
+      type:   console
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                driver:   "pdo_mysql"
+                host:     "127.0.0.1"
+                port:     "3306"
+                dbname:   "%database_name%"
+                user:     "travis"
+                password: ""
+                charset:  UTF8
+
+
+    orm:
+        default_entity_manager:         default
+        auto_generate_proxy_classes: "%kernel.debug%"
+        resolve_target_entities: []
+

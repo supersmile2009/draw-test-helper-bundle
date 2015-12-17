@@ -1,0 +1,34 @@
+{
+    "name": "draw/draw-test-helper-bundle",
+    "type": "symfony-bundle",
+    "description": "This is a set of helper class for test automation for Symfony",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Draw\\Bundle\\DrawTestHelperBundle\\": ""
+        }
+    },
+    "autoload-dev": {
+        "psr-0": {
+            "": "Tests/fixtures/src/"
+        }
+    },
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/framework-bundle": "~2.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.1.*",
+        "symfony/symfony": "~2.3",
+        "symfony/monolog-bundle": "~2.3",
+        "doctrine/doctrine-bundle": "~1.0",
+        "doctrine/orm": "~2.2,>=2.2.3",
+        "sensio/framework-extra-bundle": "~3.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
