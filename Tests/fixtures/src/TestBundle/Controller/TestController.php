@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use TestBundle\Entity\TestEntity;
 
 class TestController extends Controller
 {
@@ -90,5 +91,21 @@ class TestController extends Controller
         }
 
         return new Response($message);
+    }
+
+    /**
+     * @Route("/create-entity")
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function createEntityAction()
+    {
+        $entity = new TestEntity();
+        $manager = $this->getDoctrine()->getManager();
+        $manager->persist($entity);
+        $manager->flush($entity);
+
+        return new JsonResponse($entity);
     }
 }

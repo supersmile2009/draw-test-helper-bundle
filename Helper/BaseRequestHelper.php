@@ -4,7 +4,7 @@ namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
 abstract class BaseRequestHelper implements RequestHelperInterface
 {
-    private static $instances = [];
+    protected static $instances = [];
 
     /**
      * @var RequestHelper

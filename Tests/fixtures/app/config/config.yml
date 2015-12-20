@@ -30,21 +30,23 @@ monolog:
 
 # Doctrine Configuration
 doctrine:
-    dbal:
-        default_connection: default
-        connections:
-            default:
-                driver:   "pdo_mysql"
-                host:     "127.0.0.1"
-                port:     "3306"
-                dbname:   "%database_name%"
-                user:     "travis"
-                password: ""
-                charset:  UTF8
+  dbal:
+    default_connection: default
+    connections:
+      default:
+        driver:   "pdo_mysql"
+        host:     "127.0.0.1"
+        port:     "3306"
+        dbname:   "%database_name%"
+        user:     "travis"
+        password: ""
+        charset:  UTF8
 
-
-    orm:
-        default_entity_manager:         default
-        auto_generate_proxy_classes: "%kernel.debug%"
-        resolve_target_entities: []
+  orm:
+    default_entity_manager:         default
+    auto_generate_proxy_classes: "%kernel.debug%"
+ #   resolve_target_entities: []
+    entity_managers:
+      default:
+        auto_mapping: true
 

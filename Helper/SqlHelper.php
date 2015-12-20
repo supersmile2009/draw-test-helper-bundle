@@ -2,49 +2,115 @@
 
 namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
-class SqlHelper
+class SqlHelper extends BaseRequestHelper
 {
-    private $requestHelper;
+    /**
+     * The maximum of query
+     *
+     * @var integer
+     */
+    private $maximumQueryCount = 0;
 
-    public function __construct(RequestHelper $requestHelper)
+    /**
+     * If we must filter out the transaction related query in the count.
+     *
+     * Transaction of type "COMMIT" and "START TRANSACTION"
+     *
+     * @var boolean
+     */
+    private $filterTransactionQuery = true;
+
+    /**
+     * @return mixed
+     */
+    public function getMaximumQueryCount()
     {
-        $this->requestHelper = $requestHelper;
+        return $this->maximumQueryCount;
     }
 
     /**
-     * @param $amount
+     * @param mixed $maximumQueryCount
+     *
+     * @return $this;
      */
-    public function maximumSqlQuery($amount)
+    public function setMaximumQueryCount($maximumQueryCount)
     {
-        if (!$this->maximumSqlQuery) {
-            $this->addPreRequestCallback(
-                function () {
-                    $this->client->getKernel()->boot();
-                    $this->client->enableProfiler();
-                }
-            );
-        }
-
-        $this->maximumSqlQuery = $amount;
-        $this->asserting(
-            function () {
-                $queries = $this->client->getProfile()->getCollector('db')->getQueries()['default'];
-                //We remove the query "COMMIT" and "START TRANSACTION"
-                $queries = array_filter(
-                    $queries,
-                    function ($query) {
-                        return !is_null($query['types']);
-                    }
-                );
-
-                $this->testCase->assertLessThanOrEqual(
-                    $this->maximumSqlQuery,
-                    count($queries),
-                    json_encode($queries, JSON_PRETTY_PRINT)
-                );
-            }
-        );
+        $this->maximumQueryCount = $maximumQueryCount;
 
         return $this;
     }
+
+    /**
+     * @return boolean
+     */
+    public function getFilterTransactionQuery()
+    {
+        return $this->filterTransactionQuery;
+    }
+
+    /**
+     * @param boolean $filterTransactionQuery
+     *
+     * @return $this
+     */
+    public function setFilterTransactionQuery($filterTransactionQuery)
+    {
+        $this->filterTransactionQuery = $filterTransactionQuery;
+
+        return $this;
+    }
+
+    protected function initialize()
+    {
+        $this->requestHelper->addListener(
+            RequestHelper::EVENT_PRE_REQUEST,
+            function(RequestHelperEvent $event) {
+                $client = $event->getRequestHelper()->getClient();
+                $client->getKernel()->boot();
+                $client->enableProfiler();
+
+                $event->getRequestHelper()->asserting(
+                    function (RequestHelper $requestHelper) {
+                        $queries = $requestHelper->getClient()
+                            ->getProfile()
+                            ->getCollector('db')
+                            ->getQueries()['default'];
+
+                        if($this->getFilterTransactionQuery()) {
+                            $queries = array_filter(
+                                $queries,
+                                function ($query) {
+                                    return !is_null($query['types']);
+                                }
+                            );
+                        }
+
+                        $requestHelper->getTestCase()->assertLessThanOrEqual(
+                            $this->getMaximumQueryCount(),
+                            count($queries),
+                            "Maximum query count exceeded.\nQueries:\n",
+                            json_encode($queries, JSON_PRETTY_PRINT)
+                        );
+                    }
+                );
+            }
+        );
+    }
+
+    static public function isSingleInstance()
+    {
+        return true;
+    }
+
+    /**
+     * Return the name of the request helper
+     *
+     * @return string
+     */
+    static public function getName()
+    {
+        return 'sql';
+    }
+
+
 }

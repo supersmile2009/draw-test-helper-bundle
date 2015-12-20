@@ -301,8 +301,6 @@ class RequestHelper
     }
 
     /**
-     * @param string $message
-     *
      * @return LogHelper
      */
     public function logHelper()
@@ -310,9 +308,12 @@ class RequestHelper
         return LogHelper::instantiate($this);
     }
 
+    /**
+     * @return SqlHelper
+     */
     public function sqlHelper()
     {
-        return new SqlHelper($this);
+        return SqlHelper::instantiate($this);
     }
 
     /**
