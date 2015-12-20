@@ -4,25 +4,39 @@ namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
 use Symfony\Bundle\FrameworkBundle\Client;
 use PHPUnit_Framework_TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class RequestHelper
 {
-    public $testCase;
+    const EVENT_PRE_REQUEST = "requestHelper.preRequest";
+
+    const EVENT_POST_REQUEST = "requestHelper.postRequest";
+
+    /**
+     * @var PHPUnit_Framework_TestCase
+     */
+    private $testCase;
 
     /**
      * @var Client
      */
-    public $client;
+    private $client;
 
-    public $uri;
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
 
-    public $method = 'GET';
+    /**
+     * @var string|null
+     */
+    private $uri;
 
-    public $isJson;
-
-    public $body;
-
-    public $maximumSqlQuery;
+    /**
+     * @var string|null
+     */
+    private $method;
 
     public $assertions = [
         "statusCode" => null,
@@ -30,73 +44,251 @@ class RequestHelper
         "against" => null,
     ];
 
-    public $hooks = [
-        'preRequest' => [],
-        'preAssertion' => []
-    ];
-
-    public $contentFilters = [];
-
-    public $servers = [];
+    private $servers = [];
 
     public function __construct(PHPUnit_Framework_TestCase $testCase, Client $client)
     {
         $this->client = $client;
         $this->testCase = $testCase;
+        $this->eventDispatcher = new EventDispatcher();
         $this->expectingStatusCode(200);
-
-        $this->assertions['against'] = function () {
-            $this->filterContent($this->client->getResponse()->getContent());
-        };
     }
 
     /**
-     * @param PHPUnit_Framework_TestCase $testCase
-     * @param Client $client
-     * @return static
+     * @return Client
      */
-    public static function factory(PHPUnit_Framework_TestCase $testCase, Client $client)
+    public function getClient()
     {
-        return new static($testCase, $client);
+        return $this->client;
     }
 
-    public function addPreAssertionCallback($callback)
+    /**
+     * @return PHPUnit_Framework_TestCase
+     */
+    public function getTestCase()
     {
-        $this->hooks['preAssertion'][] = $callback;
+        return $this->testCase;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
+    /**
+     * @param string $method
+     */
+    public function setMethod($method)
+    {
+        $this->method = $method;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUri()
+    {
+        return $this->uri;
+    }
+
+    /**
+     * @param mixed $uri
+     */
+    public function setUri($uri)
+    {
+        $this->uri = $uri;
+    }
+
+    /**
+     * Set the HTTP method to HEAD and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
+    public function head($uri = null)
+    {
+        $this->setMethod('HEAD');
+        $this->setUri($uri);
 
         return $this;
     }
 
-    public function addPreRequestCallback($callback)
-    {
-        $this->hooks['preRequest'][] = $callback;
-
-        return $this;
-    }
-
+    /**
+     * Set the HTTP method to GET and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
     public function get($uri = null)
     {
-        return $this->setMethod('GET', $uri);
+        $this->setMethod('GET');
+        $this->setUri($uri);
+
+        return $this;
     }
 
+    /**
+     * Set the HTTP method to POST and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
     public function post($uri = null)
     {
-        return $this->setMethod('POST', $uri);
+        $this->setMethod('POST');
+        $this->setUri($uri);
+
+        return $this;
     }
 
-    public function delete($uri = null)
-    {
-        return $this->setMethod('DELETE', $uri);
-    }
-
+    /**
+     * Set the HTTP method to PUT and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
     public function put($uri = null)
     {
-        return $this->setMethod('PUT', $uri);
+        $this->setMethod('PUT');
+        $this->setUri($uri);
+
+        return $this;
     }
 
-    public function on($uri)
+    /**
+     * Set the HTTP method to PATCH and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
+    public function patch($uri = null)
     {
-        return $this->setUri($uri);
+        $this->setMethod('PATCH');
+        $this->setUri($uri);
+
+        return $this;
+    }
+
+    /**
+     * Set the HTTP method to DELETE and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
+    public function delete($uri = null)
+    {
+        $this->setMethod('DELETE');
+        $this->setUri($uri);
+
+        return $this;
+    }
+
+    /**
+     * Set the HTTP method to PURGE and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
+    public function purge($uri = null)
+    {
+        $this->setMethod('PURGE');
+        $this->setUri($uri);
+
+        return $this;
+    }
+
+    /**
+     * Set the HTTP method to OPTIONS and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
+    public function options($uri = null)
+    {
+        $this->setMethod('OPTIONS');
+        $this->setUri($uri);
+
+        return $this;
+    }
+
+    /**
+     * Set the HTTP method to TRACE and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
+    public function trace($uri = null)
+    {
+        $this->setMethod('TRACE');
+        $this->setUri($uri);
+
+        return $this;
+    }
+
+    /**
+     * Set the HTTP method to CONNECT and the uri if any.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param string|null $uri
+     * @return $this
+     */
+    public function connect($uri = null)
+    {
+        $this->setMethod('CONNECT');
+        $this->setUri($uri);
+
+        return $this;
+    }
+
+    /**
+     * Return the internal event dispatcher.
+     *
+     * @see RequestHelper::addListener
+     *
+     * @return EventDispatcherInterface
+     */
+    public function getEventDispatcher()
+    {
+        return $this->eventDispatcher;
+    }
+
+    /**
+     * A a listener to the internal event dispatcher.
+     *
+     * Return $this for a fluent interface.
+     *
+     * @param $eventName
+     * @param $listener
+     * @param int $priority
+     * @return $this
+     */
+    public function addListener($eventName, $listener, $priority = 0)
+    {
+        $this->eventDispatcher->addListener($eventName, $listener, $priority);
+
+        return $this;
     }
 
     /**
@@ -113,9 +305,22 @@ class RequestHelper
      *
      * @return LogHelper
      */
-    public function logHelper($message)
+    public function logHelper()
     {
-        return new LogHelper($this, $message);
+        return LogHelper::instantiate($this);
+    }
+
+    public function sqlHelper()
+    {
+        return new SqlHelper($this);
+    }
+
+    /**
+     * @return JsonHelper
+     */
+    public function jsonHelper()
+    {
+        return JsonHelper::instantiate($this);
     }
 
     public function expectContentType($contentType)
@@ -135,58 +340,13 @@ class RequestHelper
     {
         $this->assertions["responseContentType"] = function () {
             $response = $this->client->getResponse();
-            $this->testCase->assertFalse($response->headers->has('Content-Type'));
+            $this->testCase->assertNull($response->headers->get('Content-Type'));
         };
 
         $this->assertions["against"] = function () {
             $response = $this->client->getResponse();
-            $this->testCase->assertEmpty($response->getContent());
+            $this->testCase->assertEmpty($content = $response->getContent(), "Response raw content:\n" . $content);
         };
-
-        return $this;
-    }
-
-    public function expectingException($statusCode)
-    {
-        $this->expectingStatusCode($statusCode);
-        $this->contentFilters[] = function ($content) {
-            $content = json_decode($content);
-            unset($content->detail);
-
-            return json_encode($content);
-        };
-
-        return $this;
-    }
-
-    public function setUri($uri)
-    {
-        $this->uri = $uri;
-
-        return $this;
-    }
-
-    public function setMethod($method, $uri = null)
-    {
-        $this->method = $method;
-        if ($uri) {
-            $this->setUri($uri);
-        }
-
-        return $this;
-    }
-
-    public function asJson()
-    {
-        $this->isJson = true;
-        $this->expectContentType('application/json');
-
-        return $this;
-    }
-
-    public function withBody($body)
-    {
-        $this->body = $body;
 
         return $this;
     }
@@ -197,59 +357,7 @@ class RequestHelper
             $this->testCase->assertSame(
                 $statusCode,
                 $this->client->getResponse()->getStatusCode(),
-                $this->client->getResponse()->getContent()
-            );
-        };
-
-        return $this;
-    }
-
-    public function validateAgainstFile($file = null)
-    {
-        if (is_null($file)) {
-            list($class, $method) = $this->getCallingClassAndMethod();
-            $class = new \ReflectionClass($class);
-            $className = str_replace($class->getNamespaceName() . '\\', '', $class->getName());
-            $dir = dirname($class->getFileName()) . '/fixtures/out';
-            if (!is_dir($dir)) {
-                mkdir($dir, 0777, true);
-            }
-            $file = $dir . '/' . $className . '-' . $method . '.json';
-        }
-
-        $this->assertions['against'] = function () use ($file) {
-           $content = $this->filterContent($this->client->getResponse()->getContent());
-
-            if (!file_exists($file)) {
-                file_put_contents($file, json_encode(json_decode($content), JSON_PRETTY_PRINT));
-            }
-
-            $this->testCase->assertJsonStringEqualsJsonString(
-                file_get_contents($file),
-                $content
-            );
-        };
-
-        return $this;
-    }
-
-    private function filterContent($content)
-    {
-        foreach ($this->contentFilters as $filter) {
-            $content = call_user_func($filter, $content);
-        }
-
-        return $content;
-    }
-
-    public function validateAgainstString($string)
-    {
-        $this->assertions['against'] = function () use ($string) {
-            $content = $this->filterContent($this->client->getResponse()->getContent());
-
-            $this->testCase->assertJsonStringEqualsJsonString(
-                $string,
-                $content
+                "Response raw content:\n" . $this->client->getResponse()->getContent()
             );
         };
 
@@ -263,33 +371,23 @@ class RequestHelper
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function execute()
     {
-        $server = $this->servers;
-        $body = $this->body;
-        if ($this->isJson) {
-            $server['HTTP_ACCEPT'] = 'application/json';
-            $server['CONTENT_TYPE'] = 'application/json';
-            if (!is_null($this->body)) {
-                $body = json_encode($body);
-            }
-        }
+        $this->eventDispatcher->dispatch(static::EVENT_PRE_REQUEST, $event = new RequestHelperEvent($this));
 
-        foreach($this->hooks['preRequest'] as $callback) {
+        $this->client->request($this->method, $this->uri, array(), array(), $this->servers, $event->getBody());
+
+        $this->eventDispatcher->dispatch(static::EVENT_POST_REQUEST, new RequestHelperEvent($this));
+
+       // $this->eventDispatcher->dispatch(static::EVENT_ASSERT, new RequestHelperEvent($this));
+        foreach (array_filter($this->assertions) as $callback) {
             call_user_func($callback, $this);
         }
 
-        $crawler = $this->client->request($this->method, $this->uri, array(), array(), $server, $body);
-
-        foreach($this->hooks['preAssertion'] as $callback) {
-            call_user_func($callback, $this, $crawler);
-        }
-
-        foreach (array_filter($this->assertions) as $callback) {
-            call_user_func($callback, $crawler);
-        }
-
-        return $crawler;
+        return $this;
     }
 
     public function setServerParameter($name, $value)
@@ -299,57 +397,13 @@ class RequestHelper
         return $this;
     }
 
-    public function executeAndDecodeJson()
-    {
-        $this->execute();
-
-        return json_decode($this->client->getResponse()->getContent(), true);
-    }
-
     /**
-     * @param $amount
+     * @param PHPUnit_Framework_TestCase $testCase
+     * @param Client $client
+     * @return static
      */
-    public function maximumSqlQuery($amount)
+    public static function factory(PHPUnit_Framework_TestCase $testCase, Client $client)
     {
-        if(!$this->maximumSqlQuery) {
-            $this->addPreRequestCallback(function() {
-                $this->client->getKernel()->boot();
-                $this->client->enableProfiler();
-            });
-        }
-
-        $this->maximumSqlQuery = $amount;
-        $this->asserting(function() {
-            $queries = $this->client->getProfile()->getCollector('db')->getQueries()['default'];
-            //We remove the query "COMMIT" and "START TRANSACTION"
-            $queries = array_filter($queries, function($query) {
-               return !is_null($query['types']);
-            });
-
-            $this->testCase->assertLessThanOrEqual($this->maximumSqlQuery, count($queries), json_encode($queries, JSON_PRETTY_PRINT));
-        });
-
-        return $this;
-    }
-
-    private function getCallingClassAndMethod()
-    {
-
-        //get the trace
-        $trace = debug_backtrace();
-
-        // Get the class that is asking for who awoke it
-        $class = $trace[1]['class'];
-
-        // +1 to i cos we have to account for calling this function
-        for ($i = 1; $i < count($trace); $i++) {
-            if (isset($trace[$i])) // is it set?
-            {
-                if ($class != $trace[$i]['class']) // is it a different class
-                {
-                    return array($trace[$i]['class'], $trace[$i]['function']);
-                }
-            }
-        }
+        return new static($testCase, $client);
     }
 }

@@ -9,17 +9,24 @@ framework:
   test: ~
   session: ~
   validation: { enable_annotations: true }
+  profiler: {} #This nedd to be there for the logger helper
 
 sensio_framework_extra:
   router:  { annotations: true }
 
 monolog:
+  channels: ["channel"]
   handlers:
     main:
-      type: stream
-      level: debug
-    console:
-      type:   console
+      type:   stream
+      path:   "%kernel.logs_dir%/symfony_%kernel.environment%.log"
+      level:  debug
+      channels: ["!channel"]
+    channel:
+      type:     stream
+      path:     "%kernel.logs_dir%/channel_%kernel.environment%.log"
+      channels: ["channel"]
+      level:    debug
 
 # Doctrine Configuration
 doctrine:

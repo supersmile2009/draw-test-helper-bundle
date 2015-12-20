@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit colors="false" bootstrap="autoload.php">
+<phpunit colors="true" syntaxCheck="true" bootstrap="autoload.php">
     <php>
         <server name="KERNEL_DIR" value="./Tests/fixtures/app" />
     </php>
     <testsuites>
         <testsuite name="Nucleus Tests">
             <file>./Tests/Helper/RequestHelperTest.php</file>
+            <file>./Tests/Helper/JsonHelperTest.php</file>
+            <file>./Tests/Helper/LogHelperTest.php</file>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory>./</directory>
+            <exclude>
+                <directory>./Tests</directory>
+                <directory>./vendor</directory>
+                <file>./autoload.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+
+    <logging>
+        <log type="coverage-html" target="./Tests/report" charset="UTF-8"
+             highlight="false" lowUpperBound="35" highLowerBound="70"/>
+    </logging>
 </phpunit>

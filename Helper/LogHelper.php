@@ -3,30 +3,103 @@
 namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
 use Symfony\Bridge\Monolog\Handler\DebugHandler;
-use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 
-class LogHelper
+class LogHelper extends BaseRequestHelper
 {
     /**
-     * @var RequestHelper
+     * @var integer
      */
-    public $requestHelper;
+    private $level;
 
-    public $level;
+    /**
+     * @var string
+     */
+    private $message;
 
-    public $message;
+    /**
+     * @var integer
+     */
+    private $count;
 
-    public $count;
-
-    public $channel;
+    /**
+     * @var string
+     */
+    private $channel;
 
     public $contextAsserts = [];
 
-    public function __construct(RequestHelper $requestHelper, $message)
+    /**
+     * @return mixed
+     */
+    public function getMessage()
     {
-        $this->requestHelper = $requestHelper;
-        $this->message = $message;
+        return $this->message;
     }
+
+    /**
+     * @param mixed $message
+     */
+    public function setMessage($message)
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getChannel()
+    {
+        return $this->channel;
+    }
+
+    /**
+     * @param mixed $channel
+     */
+    public function setChannel($channel)
+    {
+        $this->channel = $channel;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLevel()
+    {
+        return $this->level;
+    }
+
+    /**
+     * @param int $level
+     */
+    public function setLevel($level)
+    {
+        $this->level = $level;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCount()
+    {
+        return $this->count;
+    }
+
+    /**
+     * @param int $count
+     */
+    public function setCount($count)
+    {
+        $this->count = $count;
+
+        return $this;
+    }
+
 
     /**
      * @param $propertyPath
@@ -37,26 +110,6 @@ class LogHelper
         return new LogContextHelper($this, $propertyPath);
     }
 
-    public function channel($channel)
-    {
-        $this->channel = $channel;
-
-        return $this;
-    }
-
-    public function level($level)
-    {
-        $this->level = $level;
-
-        return $this;
-    }
-
-    public function count($count)
-    {
-        $this->count = $count;
-
-        return $this;
-    }
 
     public function attach()
     {
@@ -71,28 +124,31 @@ class LogHelper
 
         $records = $logger->getRecords();
 
-        $records = array_filter($records, function($record) {
-           return $record['message'] == $this->message;
-        });
+        $records = array_filter(
+            $records,
+            function ($record) {
+                return $record['message'] == $this->getMessage();
+            }
+        );
 
-        $testCase = $this->requestHelper->testCase;
+        $testCase = $this->requestHelper->getTestCase();
 
-        if(!is_null($this->count)) {
-            $testCase->assertCount($this->count, $records);
+        if (!is_null($this->getCount())) {
+            $testCase->assertCount($this->getCount(), $records, 'Improper count');
         } else {
-            $testCase->assertNotEmpty($records);
+            $testCase->assertNotEmpty($records, 'Log not found');
         }
 
-        foreach($records as $record) {
-            if($this->level) {
-                $testCase->assertSame($this->level, $record['level']);
+        foreach ($records as $record) {
+            if ($this->getLevel()) {
+                $testCase->assertSame($this->getLevel(), $record['level'], 'Improper level');
             }
 
-            if($this->channel) {
-                $testCase->assertSame($this->channel, $record['channel']);
+            if ($this->getChannel()) {
+                $testCase->assertSame($this->getChannel(), $record['channel'], 'Improper channel');
             }
 
-            foreach($this->contextAsserts as $callback) {
+            foreach ($this->contextAsserts as $callback) {
                 call_user_func($callback, $record['context']);
             }
         }
@@ -103,11 +159,34 @@ class LogHelper
      */
     private function getDebugLogger()
     {
-        $handlers = $logs = $this->requestHelper->client->getContainer()->get('logger')->getHandlers();
+        $handlers = $logs = $this->requestHelper->getClient()->getContainer()->get('logger')->getHandlers();
+        $found = null;
         foreach ($handlers as $handler) {
             if ($handler instanceof DebugHandler) {
-                return $handler;
+                $found = $handler;
+                break;
             }
         }
+
+        $this->requestHelper->getTestCase()
+            ->assertNotNull(
+                $found,
+                "Symfony\Bridge\Monolog\Handler\DebugHandler not found.\n" .
+                'Make sure the configuration { framework: { profiler: {} } } is active.'
+            );
+        
+        return $found;
     }
+
+    /**
+     * Return the name of the request helper
+     *
+     * @return string
+     */
+    static public function getName()
+    {
+        return 'log';
+    }
+
+
 }

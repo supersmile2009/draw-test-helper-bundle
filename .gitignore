@@ -10,11 +10,12 @@
 !var/cache/.gitkeep
 !var/logs/.gitkeep
 
-# Cache and logs tests
+# Tests
 /Tests/fixtures/app/cache/*
 /Tests/fixtures/app/logs/*
 !Tests/fixtures/app/cache/.gitkeep
 !Tests/fixtures/app/logs/.gitkeep
+/Tests/report/*
 
 # Parameters
 /app/config/parameters.yml
