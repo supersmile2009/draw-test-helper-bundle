@@ -174,7 +174,7 @@ class LogHelper extends BaseRequestHelper
                 "Symfony\Bridge\Monolog\Handler\DebugHandler not found.\n" .
                 'Make sure the configuration { framework: { profiler: {} } } is active.'
             );
-        
+
         return $found;
     }
 

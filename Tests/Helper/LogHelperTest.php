@@ -27,6 +27,33 @@ class LogHelperTest extends WebTestCase
      * @depends testLogHelper
      *
      * @expectedException \PHPUnit_Framework_ExpectationFailedException
+     * @expectedExceptionMessage Log not found
+     */
+    public function testMessageFailed()
+    {
+        $requestHelper = RequestHelper::factory($this, static::createClient());
+
+        $requestHelper->get('/log?message=toto')
+            ->logHelper()->setMessage('somethingElse')->attach()
+            ->execute();
+    }
+
+    /**
+     * @depends testLogHelper
+     */
+    public function testMessage()
+    {
+        $requestHelper = RequestHelper::factory($this, static::createClient());
+
+        $requestHelper->get('/log?message=toto')
+            ->logHelper()->setMessage('toto')->attach()
+            ->execute();
+    }
+
+    /**
+     * @depends testLogHelper
+     *
+     * @expectedException \PHPUnit_Framework_ExpectationFailedException
      * @expectedExceptionMessage Improper channel
      */
     public function testChannelFailed()
