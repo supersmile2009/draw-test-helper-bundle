@@ -9,6 +9,8 @@
             <file>./Tests/Helper/JsonHelperTest.php</file>
             <file>./Tests/Helper/LogHelperTest.php</file>
             <file>./Tests/Helper/SqlHelperTest.php</file>
+            <file>./Tests/Helper/PropertyHelperTest.php</file>
+            <file phpVersion="5.4.0" phpVersionOperator=">=">./Tests/Helper/WebTestCaseTraitTest.php</file>
         </testsuite>
     </testsuites>
 
@@ -19,6 +21,7 @@
                 <directory>./Tests</directory>
                 <directory>./vendor</directory>
                 <file>./autoload.php</file>
+                <file phpVersion="5.4.0" phpVersionOperator=">=">./Tests/Helper/WebTestCaseTraitTest.php</file>
             </exclude>
         </whitelist>
     </filter>

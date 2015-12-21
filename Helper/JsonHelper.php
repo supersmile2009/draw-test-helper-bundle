@@ -23,6 +23,11 @@ class JsonHelper extends BaseRequestHelper
     private $jsonDecodeAssoc = true;
 
     /**
+     * @var PropertyHelper[]
+     */
+    private $propertyHelpers = array();
+
+    /**
      * @return boolean
      */
     public function getJsonDecodeAssoc()
@@ -47,12 +52,11 @@ class JsonHelper extends BaseRequestHelper
         $this->requestHelper->setServerParameter('HTTP_ACCEPT', 'application/json');
         $this->requestHelper->setServerParameter('CONTENT_TYPE', 'application/json');
         $this->requestHelper->expectContentType('application/json');
+        $this->requestHelper->asserting(array($this, 'assert'));
 
         $this->requestHelper->addListener(
             RequestHelper::EVENT_PRE_REQUEST,
-            function(RequestHelperEvent $event) {
-
-
+            function (RequestHelperEvent $event) {
                 if (!is_null($this->body)) {
                     $event->setBody(json_encode($this->body));
                 }
@@ -60,10 +64,32 @@ class JsonHelper extends BaseRequestHelper
         );
     }
 
+    public function assert(RequestHelper $requestHelper)
+    {
+        $data = $this->jsonDecode($requestHelper, false);
+        foreach ($this->propertyHelpers as $propertyHelper) {
+            $propertyHelper->assert($data);
+        }
+    }
+
+    private function jsonDecode(RequestHelper $requestHelper, $assoc)
+    {
+        return json_decode($requestHelper->getClient()->getResponse()->getContent(), $assoc);
+    }
+
     public function executeAndJsonDecode()
     {
-        $content = $this->requestHelper->execute()->getClient()->getResponse()->getContent();
-        return json_decode($content, $this->jsonDecodeAssoc);
+        return $this->jsonDecode($this->requestHelper->execute(), $this->jsonDecodeAssoc);
+    }
+
+    /**
+     * @return PropertyHelper
+     */
+    public function propertyHelper()
+    {
+        $this->propertyHelpers[] = $propertyHelper = PropertyHelper::instantiate($this->requestHelper);
+
+        return $propertyHelper;
     }
 
     /**

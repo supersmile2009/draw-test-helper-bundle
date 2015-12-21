@@ -292,15 +292,6 @@ class RequestHelper
     }
 
     /**
-     * @param $propertyPath
-     * @return PropertyHelper
-     */
-    public function propertyHelper($propertyPath)
-    {
-        return new PropertyHelper($this, $propertyPath);
-    }
-
-    /**
      * @return LogHelper
      */
     public function logHelper()

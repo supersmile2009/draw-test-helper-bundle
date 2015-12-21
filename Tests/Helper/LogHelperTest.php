@@ -134,6 +134,20 @@ class LogHelperTest extends WebTestCase
     /**
      * @depends testLogHelper
      */
+    public function testContextPropertyHelper()
+    {
+        $requestHelper = RequestHelper::factory($this, static::createClient());
+
+        $requestHelper->get('/log?context[test]=test')
+            ->logHelper()
+                ->setMessage('message')
+                ->contextPropertyHelper()->setPath('[test]')->attach()
+            ->execute();
+    }
+
+    /**
+     * @depends testLogHelper
+     */
     public function testNoDebugHandler()
     {
         $requestHelper = RequestHelper::factory($this, static::createClient());

@@ -26,7 +26,15 @@ class LogHelper extends BaseRequestHelper
      */
     private $channel;
 
-    public $contextAsserts = [];
+    /**
+     * @var PropertyHelper[]
+     */
+    private $contextPropertyHelpers = array();
+
+    protected function initialize()
+    {
+        $this->requestHelper->asserting(array($this, 'assert'));
+    }
 
     /**
      * @return mixed
@@ -100,22 +108,14 @@ class LogHelper extends BaseRequestHelper
         return $this;
     }
 
-
     /**
      * @param $propertyPath
-     * @return LogContextHelper
+     * @return PropertyHelper
      */
-    public function contextHelper($propertyPath)
+    public function contextPropertyHelper()
     {
-        return new LogContextHelper($this, $propertyPath);
-    }
-
-
-    public function attach()
-    {
-        $this->requestHelper->asserting(array($this, 'assert'));
-
-        return $this->requestHelper;
+        $this->contextPropertyHelpers[] = $propertyHelper = PropertyHelper::instantiate($this->requestHelper);
+        return $propertyHelper;
     }
 
     public function assert()
@@ -148,8 +148,8 @@ class LogHelper extends BaseRequestHelper
                 $testCase->assertSame($this->getChannel(), $record['channel'], 'Improper channel');
             }
 
-            foreach ($this->contextAsserts as $callback) {
-                call_user_func($callback, $record['context']);
+            foreach($this->contextPropertyHelpers as $propertyHelper) {
+                $propertyHelper->assert($record['context']);
             }
         }
     }

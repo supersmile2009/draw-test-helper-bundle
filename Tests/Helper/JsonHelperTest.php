@@ -32,6 +32,16 @@ class JsonHelperTest extends WebTestCase
         $this->assertSame(array('key' => 'value'), $result);
     }
 
+    public function testPropertyHelper()
+    {
+        $requestHelper = RequestHelper::factory($this, static::createClient());
+
+        $requestHelper->get('/test')
+            ->jsonHelper()
+            ->propertyHelper()->setPath('key')->attach()
+            ->execute();
+    }
+
     /**
      * @depends testJsonHelper
      */

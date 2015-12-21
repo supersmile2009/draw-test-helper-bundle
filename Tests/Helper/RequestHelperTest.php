@@ -123,8 +123,7 @@ class RequestHelperTest extends WebTestCase
     {
         $reflectionMethod = new \ReflectionMethod(get_class($requestHelper), $methodName);
 
-        //This is to test the fluent interface
-        $this->assertSame($requestHelper, $reflectionMethod->invoke($requestHelper, $uri));
+        $this->assertSame($requestHelper, $reflectionMethod->invoke($requestHelper, $uri), 'Fluent interface failed');
 
         $this->assertSame($httpMethod, $requestHelper->getMethod());
         $this->assertSame($uri, $requestHelper->getUri());
@@ -144,14 +143,6 @@ class RequestHelperTest extends WebTestCase
             RequestHelper::factory($this, static::$client)->jsonHelper()
         );
 
-    }
-
-    public function testPropertyHelper()
-    {
-        $this->assertInstanceOf(
-            'Draw\Bundle\DrawTestHelperBundle\Helper\PropertyHelper',
-            RequestHelper::factory($this, static::$client)->propertyHelper('test')
-        );
     }
 
     public function testLogHelper()

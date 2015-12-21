@@ -4,168 +4,131 @@ namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class PropertyHelper
+class PropertyHelper extends BaseRequestHelper
 {
-    public $propertyPath;
-
-    public $type;
-
-    public $checkIsSameValue = false;
-
-    public $value;
-
-    public $mustReplaceValue = false;
-
-    public $replaceWithValue;
-
-    public $in = [];
-
-    public $parentPropertyHelper;
-
-    public $notSameAs = [];
-
-    public $doesNotExists;
+    /**
+     * String property path compatible with Symfony\Component\PropertyAccess\PropertyAccessor
+     *
+     * @see http://symfony.com/doc/2.3/components/property_access/introduction.html
+     *
+     * @var string
+     */
+    private $path;
 
     /**
-     * @var RequestHelper
+     * @var boolean
      */
-    public $requestHelper;
+    private $doesNotExists = false;
 
-    public function __construct(RequestHelper $requestHelper, $propertyPath)
+    /**
+     * @var array
+     */
+    private $assertions = [];
+
+    /**
+     * @var \Symfony\Component\PropertyAccess\PropertyAccessorInterface
+     */
+    private $propertyAccessor;
+
+
+    protected function initialize()
     {
-        $this->requestHelper = $requestHelper;
-        $this->propertyPath = $propertyPath;
         $this->propertyAccessor = PropertyAccess::createPropertyAccessorBuilder()->getPropertyAccessor();
     }
 
-    public function isOfType($type)
+    /**
+     * @return string
+     */
+    public function getPath()
     {
-        $this->type = $type;
-
-        return $this;
+        return $this->path;
     }
 
-    public function isSameAs($value)
+    /**
+     * @param string $path
+     *
+     * return $this;
+     */
+    public function setPath($path)
     {
-        $this->checkIsSameValue = true;
-        $this->value = $value;
-
-        return $this;
-    }
-
-    public function doesNotExists()
-    {
-        $this->doesNotExists = true;
-
-        return $this;
-    }
-
-    public function notSameAs($value)
-    {
-        $this->notSameAs[] = $value;
-
-        return $this;
-    }
-
-    public function replace($with = 'checked by Draw\DrawBundle\Test\PropertyHelper')
-    {
-        $this->mustReplaceValue = true;
-        $this->replaceWithValue = $with;
+        $this->path = $path;
 
         return $this;
     }
 
     /**
-     * @param $filterCallBack
-     * @return PropertyHelper
+     * @return boolean
      */
-    public function in($filterCallBack, $match = 1)
+    public function getDoesNotExists()
     {
-        $this->in[] = [$filterCallBack, $match, $propertyHelper = new PropertyHelper($this->requestHelper, '')];
-        $this->type = 'array';
-        $propertyHelper->parentPropertyHelper = $this;
-
-        return $propertyHelper;
+        return $this->doesNotExists;
     }
 
     /**
-     * @return PropertyHelper
+     * @param boolean $doesNotExists
+     *
+     * return $this;
      */
-    public function end()
+    public function setDoesNotExists($doesNotExists)
     {
-        return $this->parentPropertyHelper;
+        $this->doesNotExists = $doesNotExists;
+
+        return $this;
     }
 
-    public function attach()
+    public function assert($data)
     {
-        $this->requestHelper->contentFilters[] = array($this, 'assert');
+        $testCase = $this->requestHelper->getTestCase();
 
-        return $this->requestHelper;
-    }
-
-    protected function assertData($data)
-    {
-        $testCase = $this->requestHelper->testCase;
-
-        if($this->doesNotExists) {
+        if ($this->getDoesNotExists()) {
             $testCase->assertFalse(
-                $this->propertyAccessor->isReadable($data, $this->propertyPath),
-                "Property does exists.\nProperty path: " . $this->propertyPath . "\nData:" .
-                json_encode($data, JSON_PRETTY_PRINT)
+                $this->propertyAccessor->isReadable($data, $this->path),
+                "Property does exists.\nProperty path: " . $this->path . "\nData:\n" .
+                json_encode($data, JSON_PRETTY_PRINT) . "\nBe careful for assoc array and object"
             );
 
             return $data;
         }
 
         $testCase->assertTrue(
-            $this->propertyAccessor->isReadable($data, $this->propertyPath),
-            "Property does not exists.\nProperty path: " . $this->propertyPath . "\nData:" .
-            json_encode($data, JSON_PRETTY_PRINT)
+            $this->propertyAccessor->isReadable($data, $this->path),
+            "Property does not exists.\nProperty path: " . $this->path . "\nData:\n" .
+            json_encode($data, JSON_PRETTY_PRINT) . "\nBe careful for assoc array and object"
         );
 
-        $value = $this->propertyAccessor->getValue($data, $this->propertyPath);
+        $value = $this->propertyAccessor->getValue($data, $this->path);
 
-        if ($this->type) {
-            $testCase->assertInternalType($this->type, $value, 'Property path: ' . $this->propertyPath);
+        foreach ($this->assertions as $assertion) {
+            list($method, $arguments) = $assertion;
+            //We insert the value at position 1 since the assert* function in phpunit
+            //always take the value as a second argument
+            array_splice($arguments, 1, 0, $value);
+            call_user_func_array(array($testCase, $method), $arguments);
         }
-
-        foreach ($this->in as $in) {
-            list($filterCallback, $match, $propertyHelper) = $in;
-            $currentMatch = 0;
-            /* @var PropertyHelper $propertyHelper */
-            foreach ($value as $key => $subValue) {
-                if (!call_user_func($filterCallback, $subValue)) {
-                    continue;
-                }
-                $currentMatch++;
-                $propertyHelper->propertyPath = $this->propertyPath . '[' . $key . ']';
-                $decodedData = json_decode($propertyHelper->assert(json_encode($data)));
-            }
-
-            $testCase->assertSame($match, $currentMatch, 'The amount of item found does not match in [' . $this->propertyPath . ']');
-        }
-
-        if ($this->checkIsSameValue) {
-            $testCase->assertJsonStringEqualsJsonString(json_encode($this->value), json_encode($value), 'Property path: ' . $this->propertyPath);
-        }
-
-        foreach($this->notSameAs as $notSameValue) {
-            $testCase->assertNotSame($notSameValue, $value, 'Property path: ' . $this->propertyPath);
-        }
-
-        if ($this->mustReplaceValue) {
-            $this->propertyAccessor->setValue($decodedData, $this->propertyPath, $this->replaceWithValue);
-        }
-
-        return $data;
     }
 
-    public function assert($data)
+    /**
+     * @param $method
+     * @param array $arguments
+     *
+     * @return $this
+     */
+    public function __call($method, $arguments = array())
     {
-        $decodedData = json_decode($data);
+        $this->assertions[] = [$method, $arguments];
 
-        $decodedData = $this->assertData($decodedData);
-
-        return json_encode($decodedData);
+        return $this;
     }
+
+    /**
+     * Return the name of the request helper
+     *
+     * @return string
+     */
+    static public function getName()
+    {
+        return 'property';
+    }
+
+
 }
