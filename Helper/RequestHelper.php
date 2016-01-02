@@ -9,6 +9,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class RequestHelper
 {
+    const EVENT_NEW_HELPER = "requestHelper.newHelper";
+
     const EVENT_PRE_REQUEST = "requestHelper.preRequest";
 
     const EVENT_POST_REQUEST = "requestHelper.postRequest";
@@ -300,11 +302,19 @@ class RequestHelper
     }
 
     /**
+     * @param null|integer $maximumQueryCount The maximum query count to set of not null
+     *
      * @return SqlHelper
      */
-    public function sqlHelper()
+    public function sqlHelper($maximumQueryCount = null)
     {
-        return SqlHelper::instantiate($this);
+        $sqlHelper = SqlHelper::instantiate($this);
+
+        if (!is_null($maximumQueryCount)) {
+            $sqlHelper->setMaximumQueryCount($maximumQueryCount);
+        }
+
+        return $sqlHelper;
     }
 
     /**
