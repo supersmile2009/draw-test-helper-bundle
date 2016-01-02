@@ -88,7 +88,7 @@ class SqlHelper extends BaseRequestHelper
                         $requestHelper->getTestCase()->assertLessThanOrEqual(
                             $this->getMaximumQueryCount(),
                             count($queries),
-                            "Maximum query count exceeded.\nQueries:\n",
+                            "Maximum query count exceeded.\nQueries:\n" .
                             json_encode($queries, JSON_PRETTY_PRINT)
                         );
                     }
