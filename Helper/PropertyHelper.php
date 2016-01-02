@@ -258,7 +258,7 @@ class PropertyHelper extends BaseRequestHelper
     /**
      * @param boolean $doesNotExists
      *
-     * return $this;
+     * return $this
      */
     public function setDoesNotExists($doesNotExists)
     {
@@ -271,28 +271,32 @@ class PropertyHelper extends BaseRequestHelper
     {
         $testCase = $this->requestHelper->getTestCase();
 
-        if ($this->getDoesNotExists()) {
-            $testCase->assertFalse(
+        if($this->getPath() === "") {
+            $value = $data;
+        } else {
+            if ($this->getDoesNotExists()) {
+                $testCase->assertFalse(
+                    $this->propertyAccessor->isReadable($data, $this->path),
+                    "Property does exists.\nProperty path: " . $this->path . "\nData:\n" .
+                    json_encode($data, JSON_PRETTY_PRINT) . "\nBe careful for assoc array and object"
+                );
+
+                return $data;
+            }
+
+            $testCase->assertTrue(
                 $this->propertyAccessor->isReadable($data, $this->path),
-                "Property does exists.\nProperty path: " . $this->path . "\nData:\n" .
+                "Property does not exists.\nProperty path: " . $this->path . "\nData:\n" .
                 json_encode($data, JSON_PRETTY_PRINT) . "\nBe careful for assoc array and object"
             );
 
-            return $data;
+            $value = $this->propertyAccessor->getValue($data, $this->path);
         }
-
-        $testCase->assertTrue(
-            $this->propertyAccessor->isReadable($data, $this->path),
-            "Property does not exists.\nProperty path: " . $this->path . "\nData:\n" .
-            json_encode($data, JSON_PRETTY_PRINT) . "\nBe careful for assoc array and object"
-        );
-
-        $value = $this->propertyAccessor->getValue($data, $this->path);
 
         foreach ($this->assertions as $assertion) {
             list($method, $arguments) = $assertion;
             $reflectionMethod = new \ReflectionMethod(get_class($testCase), $method);
-            $parameterName = static::$assertMethodParameterReplacements[$method];
+            $parameterName = self::$assertMethodParameterReplacements[$method];
             $position = null;
             foreach($reflectionMethod->getParameters() as $key => $parameter) {
                 if($parameter->getName() == $parameterName) {
@@ -301,7 +305,8 @@ class PropertyHelper extends BaseRequestHelper
                 }
             }
 
-            array_splice($arguments, $position, 0, $value);
+            array_splice($arguments, $position, 0, array($value));
+
             $reflectionMethod->invokeArgs($testCase, $arguments);
         }
     }
