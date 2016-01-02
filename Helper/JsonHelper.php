@@ -28,6 +28,11 @@ class JsonHelper extends BaseRequestHelper
     private $propertyHelpers = array();
 
     /**
+     * @var null|string
+     */
+    private $expectedJsonString = null;
+
+    /**
      * @return boolean
      */
     public function getJsonDecodeAssoc()
@@ -66,6 +71,14 @@ class JsonHelper extends BaseRequestHelper
 
     public function assert(RequestHelper $requestHelper)
     {
+        if($this->expectedJsonString) {
+            $requestHelper->getTestCase()
+                ->assertJsonStringEqualsJsonString(
+                    $this->expectedJsonString,
+                    $requestHelper->getClient()->getResponse()->getContent()
+                );
+        }
+
         $data = $this->jsonDecode($requestHelper, false);
         foreach ($this->propertyHelpers as $propertyHelper) {
             $propertyHelper->assert($data);
@@ -82,13 +95,23 @@ class JsonHelper extends BaseRequestHelper
         return $this->jsonDecode($this->requestHelper->execute(), $this->jsonDecodeAssoc);
     }
 
-    /**
-     * @return PropertyHelper
-     */
-    public function propertyHelper()
+    public function assertContentEqualsJsonString($expectedJsonString)
     {
-        $this->propertyHelpers[] = $propertyHelper = PropertyHelper::instantiate($this->requestHelper);
+        $this->expectedJsonString = $expectedJsonString;
 
+        return $this;
+    }
+
+    /**
+     * @return JsonRequestPropertyHelper
+     */
+    public function propertyHelper($path = null)
+    {
+        $this->propertyHelpers[] = $propertyHelper = JsonRequestPropertyHelper::instantiate($this->requestHelper);
+
+        if(!is_null($path)) {
+            $propertyHelper->setPath($path);
+        }
         return $propertyHelper;
     }
 
