@@ -27,6 +27,16 @@ abstract class BaseRequestHelper implements RequestHelperInterface
     }
 
     /**
+     * Return the parent in the call tree
+     *
+     * @return RequestHelper|mixed
+     */
+    public function end()
+    {
+        return $this->requestHelper;
+    }
+
+    /**
      * Return the initial request helper so it can have a fluent interface.
      *
      * @return RequestHelper
@@ -57,6 +67,12 @@ abstract class BaseRequestHelper implements RequestHelperInterface
         $instance = new static();
         $instance->requestHelper = $requestHelper;
         $instance->initialize();
+
+        $requestHelper->getEventDispatcher()
+            ->dispatch(
+                RequestHelper::EVENT_NEW_HELPER,
+                new RequestHelperEvent($requestHelper, array('helper' => $instance))
+            );
 
         if(static::isSingleInstance()) {
             static::$instances[$objectHash][static::getName()] = $instance;
