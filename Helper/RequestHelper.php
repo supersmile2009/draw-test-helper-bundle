@@ -378,6 +378,8 @@ class RequestHelper
      */
     public function execute()
     {
+        $this->client->getKernel()->shutdown();
+        $this->client->getKernel()->boot();
         $this->eventDispatcher->dispatch(static::EVENT_PRE_REQUEST, $event = new RequestHelperEvent($this));
 
         $this->client->request($this->method, $this->uri, array(), array(), $this->servers, $event->getBody());
