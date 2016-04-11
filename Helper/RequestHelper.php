@@ -110,12 +110,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function head($uri = null)
+    public function head($uri = null, $expectedStatus = null)
     {
         $this->setMethod('HEAD');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
@@ -126,12 +130,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function get($uri = null)
+    public function get($uri = null, $expectedStatus = null)
     {
         $this->setMethod('GET');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
@@ -142,12 +150,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function post($uri = null)
+    public function post($uri = null, $expectedStatus = null)
     {
         $this->setMethod('POST');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
@@ -158,12 +170,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function put($uri = null)
+    public function put($uri = null, $expectedStatus = null)
     {
         $this->setMethod('PUT');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
@@ -174,12 +190,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function patch($uri = null)
+    public function patch($uri = null, $expectedStatus = null)
     {
         $this->setMethod('PATCH');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
@@ -190,12 +210,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function delete($uri = null)
+    public function delete($uri = null, $expectedStatus = null)
     {
         $this->setMethod('DELETE');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
@@ -206,12 +230,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function purge($uri = null)
+    public function purge($uri = null, $expectedStatus = null)
     {
         $this->setMethod('PURGE');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
@@ -222,12 +250,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function options($uri = null)
+    public function options($uri = null, $expectedStatus = null)
     {
         $this->setMethod('OPTIONS');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
@@ -238,12 +270,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function trace($uri = null)
+    public function trace($uri = null, $expectedStatus = null)
     {
         $this->setMethod('TRACE');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
@@ -254,12 +290,16 @@ class RequestHelper
      * Return $this for a fluent interface.
      *
      * @param string|null $uri
+     * @param integer|null $expectedStatus
      * @return $this
      */
-    public function connect($uri = null)
+    public function connect($uri = null, $expectedStatus = null)
     {
         $this->setMethod('CONNECT');
         $this->setUri($uri);
+        if(!is_null($expectedStatus)) {
+            $this->expectingStatusCode($expectedStatus);
+        }
 
         return $this;
     }
