@@ -110,11 +110,18 @@ class LogHelper extends BaseRequestHelper
 
     /**
      * @param $propertyPath
-     * @return PropertyHelper
+     * @return LogContextPropertyHelper
      */
-    public function contextPropertyHelper()
+    public function contextPropertyHelper($propertyPath = null)
     {
-        $this->contextPropertyHelpers[] = $propertyHelper = PropertyHelper::instantiate($this->requestHelper);
+        $this->contextPropertyHelpers[] = $propertyHelper = LogContextPropertyHelper::instantiate($this->requestHelper);
+
+        $propertyHelper->logHelper = $this;
+
+        if(!is_null($propertyPath)) {
+            $propertyHelper->setPath($propertyPath);
+        }
+
         return $propertyHelper;
     }
 
