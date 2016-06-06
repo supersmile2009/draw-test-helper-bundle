@@ -40,6 +40,11 @@ class RequestHelper
      */
     private $method;
 
+    /**
+     * @var string|null
+     */
+    private $body;
+
     public $assertions = [
         "statusCode" => null,
         "responseContentType" => null,
@@ -305,6 +310,27 @@ class RequestHelper
     }
 
     /**
+     * @return null|string
+     */
+    public function getBody()
+    {
+        return $this->body;
+    }
+
+    /**
+     * Set the default body
+     *
+     * @param null|string $body
+     * @return $this
+     */
+    public function setBody($body)
+    {
+        $this->body = $body;
+
+        return $this;
+    }
+
+    /**
      * Return the internal event dispatcher.
      *
      * @see RequestHelper::addListener
@@ -420,7 +446,9 @@ class RequestHelper
     {
         $this->client->getKernel()->shutdown();
         $this->client->getKernel()->boot();
-        $this->eventDispatcher->dispatch(static::EVENT_PRE_REQUEST, $event = new RequestHelperEvent($this));
+        $event = new RequestHelperEvent($this);
+        $event->setBody($this->body);
+        $this->eventDispatcher->dispatch(static::EVENT_PRE_REQUEST, $event);
 
         $this->client->request($this->method, $this->uri, array(), array(), $this->servers, $event->getBody());
 
