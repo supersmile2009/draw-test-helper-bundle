@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Client;
 use PHPUnit_Framework_TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class RequestHelper
 {
@@ -44,6 +45,13 @@ class RequestHelper
      * @var string|null
      */
     private $body;
+
+    /**
+     * A list of <filename,path> to upload to the server
+     *
+     * @var <string,string>
+     */
+    private $files = [];
 
     public $assertions = [
         "statusCode" => null,
@@ -331,6 +339,41 @@ class RequestHelper
     }
 
     /**
+     * @param $name
+     * @param $filePath
+     * @param $originalName
+     * @param $mimeType
+     * @param int $error
+     * @return RequestHelper
+     */
+    public function addFile($name, $filePath, $originalName, $mimeType = null, $error = null)
+    {
+        return $this->addUpdatedFile(
+            $name,
+            new UploadedFile(
+                $filePath,
+                $originalName,
+                $mimeType,
+                filesize($filePath),
+                $error,
+                true
+            )
+        );
+    }
+
+    /**
+     * @param $name
+     * @param UploadedFile $uploadedFile
+     * @return $this
+     */
+    public function addUpdatedFile($name, UploadedFile $uploadedFile)
+    {
+        $this->files[$name] = $uploadedFile;
+
+        return $this;
+    }
+
+    /**
      * Return the internal event dispatcher.
      *
      * @see RequestHelper::addListener
@@ -450,7 +493,7 @@ class RequestHelper
         $event->setBody($this->body);
         $this->eventDispatcher->dispatch(static::EVENT_PRE_REQUEST, $event);
 
-        $this->client->request($this->method, $this->uri, array(), array(), $this->servers, $event->getBody());
+        $this->client->request($this->method, $this->uri, array(), $this->files, $this->servers, $event->getBody());
 
         $this->eventDispatcher->dispatch(static::EVENT_POST_REQUEST, new RequestHelperEvent($this));
 
