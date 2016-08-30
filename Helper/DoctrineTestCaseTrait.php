@@ -13,7 +13,13 @@ trait DoctrineTestCaseTrait
         $doctrine = $kernel->getContainer()->get("doctrine");
         $manager = $doctrine->getManagerForClass($class);
 
-        foreach($doctrine->getRepository($class)->findBy($criteria) as $result) {
+        if($criteria) {
+            $entities = $doctrine->getRepository($class)->findBy($criteria);
+        } else {
+            $entities =$doctrine->getRepository($class)->findAll();
+        }
+
+        foreach($entities as $result) {
             $manager->remove($result);
         }
 

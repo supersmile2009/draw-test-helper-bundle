@@ -46,6 +46,6 @@ trait ServiceTestCaseTrait
         }
 
         $application->setDispatcher($container->get('event_dispatcher'));
-        return new CommandHelper($application->find($commandName));
+        return new CommandHelper($container, $application->find($commandName));
     }
 }

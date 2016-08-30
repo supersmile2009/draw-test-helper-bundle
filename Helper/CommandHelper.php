@@ -4,6 +4,7 @@ namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class CommandHelper extends CommandTester
 {
@@ -13,12 +14,18 @@ class CommandHelper extends CommandTester
     private $theCommand;
 
     /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
      * Constructor.
      *
      * @param Command $command A Command instance to test.
      */
-    public function __construct(Command $command)
+    public function __construct(ContainerInterface $container, Command $command)
     {
+        $this->container = $container;
         $this->theCommand = $command;
         parent::__construct($command);
     }
@@ -29,5 +36,13 @@ class CommandHelper extends CommandTester
     public function getCommand()
     {
         return $this->theCommand;
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    public function getContainer()
+    {
+        return $this->container;
     }
 }
