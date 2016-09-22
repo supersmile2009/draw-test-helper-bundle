@@ -46,6 +46,8 @@ class RequestHelper
      */
     private $body;
 
+    private $parameters = [];
+
     /**
      * A list of <filename,path> to upload to the server
      *
@@ -67,6 +69,55 @@ class RequestHelper
         $this->testCase = $testCase;
         $this->eventDispatcher = new EventDispatcher();
         $this->expectingStatusCode(200);
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     * @return $this
+     */
+    public function setParameter($name, $value)
+    {
+        $this->parameters[$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param $name
+     * @return mixed|null
+     */
+    public function getParameter($name)
+    {
+        return array_key_exists($name, $this->parameters) ? $this->parameters[$name] : null;
+    }
+
+    /**
+     * @param $name
+     * @return bool
+     */
+    public function hasParameter($name)
+    {
+        return array_key_exists($name, $this->parameters);
+    }
+
+    /**
+     * @return array
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * @param array $parameters
+     * @return $this
+     */
+    public function setParameters(array $parameters)
+    {
+        $this->parameters = $parameters;
+
+        return $this;
     }
 
     /**
@@ -130,7 +181,7 @@ class RequestHelper
     {
         $this->setMethod('HEAD');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -150,7 +201,7 @@ class RequestHelper
     {
         $this->setMethod('GET');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -170,7 +221,7 @@ class RequestHelper
     {
         $this->setMethod('POST');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -190,7 +241,7 @@ class RequestHelper
     {
         $this->setMethod('PUT');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -210,7 +261,7 @@ class RequestHelper
     {
         $this->setMethod('PATCH');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -230,7 +281,7 @@ class RequestHelper
     {
         $this->setMethod('DELETE');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -250,7 +301,7 @@ class RequestHelper
     {
         $this->setMethod('PURGE');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -270,7 +321,7 @@ class RequestHelper
     {
         $this->setMethod('OPTIONS');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -290,7 +341,7 @@ class RequestHelper
     {
         $this->setMethod('TRACE');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -310,7 +361,7 @@ class RequestHelper
     {
         $this->setMethod('CONNECT');
         $this->setUri($uri);
-        if(!is_null($expectedStatus)) {
+        if (!is_null($expectedStatus)) {
             $this->expectingStatusCode($expectedStatus);
         }
 
@@ -493,11 +544,18 @@ class RequestHelper
         $event->setBody($this->body);
         $this->eventDispatcher->dispatch(static::EVENT_PRE_REQUEST, $event);
 
-        $this->client->request($this->method, $this->uri, array(), $this->files, $this->servers, $event->getBody());
+        $this->client->request(
+            $this->method,
+            $this->uri,
+            $this->parameters,
+            $this->files,
+            $this->servers,
+            $event->getBody()
+        );
 
         $this->eventDispatcher->dispatch(static::EVENT_POST_REQUEST, new RequestHelperEvent($this));
 
-       // $this->eventDispatcher->dispatch(static::EVENT_ASSERT, new RequestHelperEvent($this));
+        // $this->eventDispatcher->dispatch(static::EVENT_ASSERT, new RequestHelperEvent($this));
         foreach (array_filter($this->assertions) as $callback) {
             call_user_func($callback, $this);
         }
