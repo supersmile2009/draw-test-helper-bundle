@@ -13,6 +13,11 @@ trait WebTestCaseTrait
 
     public static function setUpBeforeClass()
     {
+        static::drawSetUpBeforeClass();
+    }
+
+    public static function drawSetUpBeforeClass()
+    {
         static::$client = static::createClient();
     }
 
