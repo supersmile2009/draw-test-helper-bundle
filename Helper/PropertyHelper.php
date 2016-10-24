@@ -221,10 +221,26 @@ class PropertyHelper extends BaseRequestHelper
      */
     private $propertyAccessor;
 
+    private $reference;
+
+    private $assignReference = true;
 
     protected function initialize()
     {
         $this->propertyAccessor = PropertyAccess::createPropertyAccessorBuilder()->getPropertyAccessor();
+    }
+
+    /**
+     * @param $reference
+     *
+     * @return $this
+     */
+    public function assign(&$reference)
+    {
+        $this->reference = &$reference;
+        $this->assignReference = true;
+
+        return $this;
     }
 
     /**
@@ -308,6 +324,11 @@ class PropertyHelper extends BaseRequestHelper
             array_splice($arguments, $position, 0, array($value));
 
             $reflectionMethod->invokeArgs($testCase, $arguments);
+        }
+
+        if($this->assignReference) {
+            $this->reference = $value;
+            unset($this->reference);
         }
     }
 
