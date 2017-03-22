@@ -2,8 +2,8 @@
 
 namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Client;
-use PHPUnit_Framework_TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -17,7 +17,7 @@ class RequestHelper
     const EVENT_POST_REQUEST = "requestHelper.postRequest";
 
     /**
-     * @var PHPUnit_Framework_TestCase
+     * @var TestCase
      */
     private $testCase;
 
@@ -63,7 +63,7 @@ class RequestHelper
 
     private $servers = [];
 
-    public function __construct(PHPUnit_Framework_TestCase $testCase, Client $client)
+    public function __construct(TestCase $testCase, Client $client)
     {
         $this->client = $client;
         $this->testCase = $testCase;
@@ -129,7 +129,7 @@ class RequestHelper
     }
 
     /**
-     * @return PHPUnit_Framework_TestCase
+     * @return TestCase
      */
     public function getTestCase()
     {
@@ -572,11 +572,11 @@ class RequestHelper
     }
 
     /**
-     * @param PHPUnit_Framework_TestCase $testCase
+     * @param TestCase $testCase
      * @param Client $client
      * @return static
      */
-    public static function factory(PHPUnit_Framework_TestCase $testCase, Client $client)
+    public static function factory(TestCase $testCase, Client $client)
     {
         return new static($testCase, $client);
     }
