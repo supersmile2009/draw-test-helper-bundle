@@ -48,6 +48,8 @@ class RequestHelper
 
     private $parameters = [];
 
+    private $queryFilters = [];
+
     /**
      * A list of <filename,path> to upload to the server
      *
@@ -466,9 +468,10 @@ class RequestHelper
      *
      * @return SqlHelper
      */
-    public function sqlHelper($maximumQueryCount = null)
+    public function sqlHelper($maximumQueryCount = null, $filters = [])
     {
         $sqlHelper = SqlHelper::instantiate($this);
+        $sqlHelper->setQueryFilters($filters);
 
         if (!is_null($maximumQueryCount)) {
             $sqlHelper->setMaximumQueryCount($maximumQueryCount);

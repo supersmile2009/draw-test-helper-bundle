@@ -3,6 +3,7 @@
 namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
 use Symfony\Bridge\Monolog\Handler\DebugHandler;
+use Symfony\Bridge\Monolog\Processor\DebugProcessor;
 
 class LogHelper extends BaseRequestHelper
 {
@@ -169,7 +170,7 @@ class LogHelper extends BaseRequestHelper
         $handlers = $logs = $this->requestHelper->getClient()->getContainer()->get('logger')->getHandlers();
         $found = null;
         foreach ($handlers as $handler) {
-            if ($handler instanceof DebugHandler) {
+            if ($handler instanceof DebugProcessor) {
                 $found = $handler;
                 break;
             }

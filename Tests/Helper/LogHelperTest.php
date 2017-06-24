@@ -5,7 +5,9 @@ namespace Draw\Bundle\DrawTestHelperBundle\Tests\Helper;
 use Draw\Bundle\DrawTestHelperBundle\Helper\LogHelper;
 use Draw\Bundle\DrawTestHelperBundle\Helper\RequestHelper;
 use Monolog\Logger;
+use PHPUnit\Framework\AssertionFailedError;
 use Symfony\Bridge\Monolog\Handler\DebugHandler;
+use Symfony\Bridge\Monolog\Processor\DebugProcessor;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class LogHelperTest extends WebTestCase
@@ -157,17 +159,14 @@ class LogHelperTest extends WebTestCase
         $handlers = $logger->getHandlers();
 
         foreach ($handlers as $index => $handler) {
-            if ($handler instanceof DebugHandler) {
+            if ($handler instanceof DebugProcessor) {
                 unset($handlers[$index]);
             }
         }
 
         $logger->setHandlers($handlers);
 
-        $this->setExpectedException(
-            'PHPUnit_Framework_AssertionFailedError',
-            "Symfony\Bridge\Monolog\Handler\DebugHandler not found.\nMake sure the configuration { framework: { profiler: {} } } is active."
-        );
+        $this->expectException(AssertionFailedError::class);
 
         $requestHelper->get('/log?count=2')
             ->logHelper()->setMessage('message')->setCount(2)->attach()

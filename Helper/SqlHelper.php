@@ -11,6 +11,8 @@ class SqlHelper extends BaseRequestHelper
      */
     private $maximumQueryCount = 0;
 
+    private $queryFilters = [];
+
     /**
      * If we must filter out the transaction related query in the count.
      *
@@ -26,6 +28,10 @@ class SqlHelper extends BaseRequestHelper
     public function getMaximumQueryCount()
     {
         return $this->maximumQueryCount;
+    }
+
+    public function setQueryFilters($filters = []){
+        $this->queryFilters = $filters;
     }
 
     /**
@@ -83,6 +89,13 @@ class SqlHelper extends BaseRequestHelper
                                     return !is_null($query['types']);
                                 }
                             );
+                        }
+
+                        //we apply extra custom filters.
+                        if (!empty($this->queryFilters)) {
+                            foreach ($this->queryFilters as $filter) {
+                                $queries = array_filter($queries, $filter);
+                            }
                         }
 
                         $requestHelper->getTestCase()->assertLessThanOrEqual(
