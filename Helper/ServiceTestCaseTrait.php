@@ -9,6 +9,11 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 trait ServiceTestCaseTrait
 {
     /**
+     * @var bool
+     */
+    protected static $firstBoot = true;
+
+    /**
      * @param array $options
      * @return \Symfony\Component\HttpKernel\KernelInterface
      */
@@ -16,16 +21,22 @@ trait ServiceTestCaseTrait
 
     /**
      * @param string $kernelName
+     * @param boolean $debug - should we create a kernel with debug? Normally additional kernels don't need debug,
+     * it only slows the test down
      * @return \Symfony\Component\HttpKernel\KernelInterface
      */
-    protected static function getSharedKernel($kernelName = 'default')
+    protected static function getSharedKernel($kernelName = 'default', $debug = false)
     {
         if (!isset(KernelRegistry::$kernels[$kernelName])) {
-            $kernel = static::createKernel(array());
+            if (static::$firstBoot) {
+                $debug = true;
+            }
+            $kernel = static::createKernel(['debug' => $debug]);
             $kernel->boot();
             KernelRegistry::$kernels[$kernelName] = $kernel;
         }
 
+        static::$firstBoot = false;
         return KernelRegistry::$kernels[$kernelName];
     }
 
