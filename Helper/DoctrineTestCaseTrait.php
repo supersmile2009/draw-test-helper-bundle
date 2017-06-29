@@ -24,8 +24,5 @@ trait DoctrineTestCaseTrait
         }
 
         $manager->flush();
-
-        $kernel->shutdown();
-        $kernel->boot();
     }
 }
