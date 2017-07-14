@@ -102,6 +102,13 @@ class JsonHelper extends BaseRequestHelper
         return $this;
     }
 
+    public function assertContentEqualsJsonFile($fileName)
+    {
+        $this->expectedJsonString = file_get_contents($fileName);
+
+        return $this;
+    }
+
     /**
      * @return JsonRequestPropertyHelper
      */

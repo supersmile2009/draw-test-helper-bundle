@@ -2,8 +2,7 @@
 
 namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
-use Symfony\Bridge\Monolog\Handler\DebugHandler;
-use Symfony\Bridge\Monolog\Processor\DebugProcessor;
+use Monolog\Handler\TestHandler;
 
 class LogHelper extends BaseRequestHelper
 {
@@ -47,6 +46,7 @@ class LogHelper extends BaseRequestHelper
 
     /**
      * @param mixed $message
+     * @return $this
      */
     public function setMessage($message)
     {
@@ -65,6 +65,7 @@ class LogHelper extends BaseRequestHelper
 
     /**
      * @param mixed $channel
+     * @return $this
      */
     public function setChannel($channel)
     {
@@ -83,6 +84,7 @@ class LogHelper extends BaseRequestHelper
 
     /**
      * @param int $level
+     * @return $this
      */
     public function setLevel($level)
     {
@@ -101,6 +103,7 @@ class LogHelper extends BaseRequestHelper
 
     /**
      * @param int $count
+     * @return $this
      */
     public function setCount($count)
     {
@@ -170,7 +173,7 @@ class LogHelper extends BaseRequestHelper
         $handlers = $logs = $this->requestHelper->getClient()->getContainer()->get('logger')->getHandlers();
         $found = null;
         foreach ($handlers as $handler) {
-            if ($handler instanceof DebugProcessor) {
+            if ($handler instanceof TestHandler) {
                 $found = $handler;
                 break;
             }
@@ -179,7 +182,7 @@ class LogHelper extends BaseRequestHelper
         $this->requestHelper->getTestCase()
             ->assertNotNull(
                 $found,
-                "Symfony\Bridge\Monolog\Handler\DebugHandler not found.\n" .
+                "Monolog\Handler\TestHandler not found.\n" .
                 'Make sure the configuration { framework: { profiler: {} } } is active.'
             );
 

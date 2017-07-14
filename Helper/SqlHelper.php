@@ -71,41 +71,45 @@ class SqlHelper extends BaseRequestHelper
         $this->requestHelper->addListener(
             RequestHelper::EVENT_PRE_REQUEST,
             function(RequestHelperEvent $event) {
-                $client = $event->getRequestHelper()->getClient();
-                $client->getKernel()->boot();
-                $client->enableProfiler();
+                // This constant is defined in php-unit config file (e. g. phpunit.xml)
+                if (DISABLE_SQL_QUERY_CHECKS !== true) {
+                    $client = $event->getRequestHelper()->getClient();
+                    $client->getKernel()->shutdown();
+                    $client->getKernel()->boot();
+                    $client->enableProfiler();
 
-                $event->getRequestHelper()->asserting(
-                    function (RequestHelper $requestHelper) {
-                        $queries = $requestHelper->getClient()
-                            ->getProfile()
-                            ->getCollector('db')
-                            ->getQueries()['default'];
+                    $event->getRequestHelper()->asserting(
+                        function (RequestHelper $requestHelper) {
+                            $queries = $requestHelper->getClient()
+                                ->getProfile()
+                                ->getCollector('db')
+                                ->getQueries()['default'];
 
-                        if($this->getFilterTransactionQuery()) {
-                            $queries = array_filter(
-                                $queries,
-                                function ($query) {
-                                    return !is_null($query['types']);
+                            if ($this->getFilterTransactionQuery()) {
+                                $queries = array_filter(
+                                    $queries,
+                                    function ($query) {
+                                        return !is_null($query['types']);
+                                    }
+                                );
+                            }
+
+                            //we apply extra custom filters.
+                            if (!empty($this->queryFilters)) {
+                                foreach ($this->queryFilters as $filter) {
+                                    $queries = array_filter($queries, $filter);
                                 }
+                            }
+
+                            $requestHelper->getTestCase()->assertLessThanOrEqual(
+                                $this->getMaximumQueryCount(),
+                                count($queries),
+                                "Maximum query count exceeded.\nQueries:\n".
+                                json_encode($queries, JSON_PRETTY_PRINT)
                             );
                         }
-
-                        //we apply extra custom filters.
-                        if (!empty($this->queryFilters)) {
-                            foreach ($this->queryFilters as $filter) {
-                                $queries = array_filter($queries, $filter);
-                            }
-                        }
-
-                        $requestHelper->getTestCase()->assertLessThanOrEqual(
-                            $this->getMaximumQueryCount(),
-                            count($queries),
-                            "Maximum query count exceeded.\nQueries:\n" .
-                            json_encode($queries, JSON_PRETTY_PRINT)
-                        );
-                    }
-                );
+                    );
+                }
             }
         );
     }

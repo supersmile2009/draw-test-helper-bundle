@@ -254,7 +254,7 @@ class PropertyHelper extends BaseRequestHelper
     /**
      * @param string $path
      *
-     * return $this;
+     * @return $this;
      */
     public function setPath($path)
     {
@@ -274,7 +274,7 @@ class PropertyHelper extends BaseRequestHelper
     /**
      * @param boolean $doesNotExists
      *
-     * return $this
+     * @return $this
      */
     public function setDoesNotExists($doesNotExists)
     {

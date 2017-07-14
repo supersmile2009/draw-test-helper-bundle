@@ -3,7 +3,6 @@
 namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
 trait ServiceTestCaseTrait
@@ -28,16 +27,33 @@ trait ServiceTestCaseTrait
     protected static function getSharedKernel($kernelName = 'default', $debug = false)
     {
         if (!isset(KernelRegistry::$kernels[$kernelName])) {
-            if (static::$firstBoot) {
+            if (static::$firstBoot || $kernelName === 'default') {
                 $debug = true;
             }
-            $kernel = static::createKernel(['debug' => $debug]);
-            $kernel->boot();
+            if ($kernelName === 'delete') {
+                if ($kernel = static::getKernelFromGlobals($kernelName) === null) {
+                    $kernel = static::createKernel(['debug' => false]);
+                    $GLOBALS['kernels']['delete'] = $kernel;
+                    $kernel->boot();
+                }
+            } else {
+                $kernel = static::createKernel(['debug' => $debug]);
+                $kernel->boot();
+            }
+
             KernelRegistry::$kernels[$kernelName] = $kernel;
         }
 
         static::$firstBoot = false;
         return KernelRegistry::$kernels[$kernelName];
+    }
+
+    private static function getKernelFromGlobals($kernelName)
+    {
+        if (isset($GLOBALS['kernels'][$kernelName])) {
+            return $GLOBALS['kernels'][$kernelName];
+        }
+        return null;
     }
 
     /**
