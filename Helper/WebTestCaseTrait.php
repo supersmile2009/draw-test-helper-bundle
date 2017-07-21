@@ -77,7 +77,6 @@ trait WebTestCaseTrait
     protected function tearDown()
     {
         static::clearClientEntityManagerCache();
-        static::clearKernelEntityManagerCache();
     }
 
     protected static function clearClientEntityManagerCache($client = null)
@@ -89,13 +88,6 @@ trait WebTestCaseTrait
             if ($client->getKernel()->getContainer() !== null) {
                 $client->getKernel()->getContainer()->get('doctrine')->getManager()->clear();
             }
-        }
-    }
-
-    protected static function clearKernelEntityManagerCache()
-    {
-        if (static::getSharedKernel()->getContainer() !== null) {
-            static::getSharedKernel()->getContainer()->get('doctrine')->getManager()->clear();
         }
     }
 

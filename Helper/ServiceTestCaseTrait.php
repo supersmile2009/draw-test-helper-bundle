@@ -56,6 +56,13 @@ trait ServiceTestCaseTrait
         return null;
     }
 
+    protected static function clearKernelEntityManagerCache()
+    {
+        if (static::getSharedKernel()->getContainer() !== null) {
+            static::getSharedKernel()->getContainer()->get('doctrine')->getManager()->clear();
+        }
+    }
+
     /**
      * @param $object
      * @param $propertyName
