@@ -70,13 +70,12 @@ trait WebTestCaseTrait
 
     /**
      * Overriding Symfony's default teatDown method, which reboots kernel after each test, which is very slow.
-     * Instead we'd rather clear entity managers' cache, which is often quite useful and extremely fast.
      *
      * Kernel or client reboots should be added manually to the tests that really need it.
      */
     protected function tearDown()
     {
-        static::clearClientEntityManagerCache();
+        // This method is doing nothing intentionally. If you need to add some code here, feel free to do so.
     }
 
     protected static function clearClientEntityManagerCache($client = null)
