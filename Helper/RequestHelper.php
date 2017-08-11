@@ -561,10 +561,6 @@ class RequestHelper
             call_user_func($callback, $this);
         }
 
-        if ($this->client->getKernel()->getContainer() !== null) {
-            $this->client->getKernel()->getContainer()->get('doctrine')->getManager()->clear();
-        }
-
         return $this;
     }
 

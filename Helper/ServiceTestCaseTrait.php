@@ -7,8 +7,6 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
 trait ServiceTestCaseTrait
 {
-    use NonRebootableKernelTestTrait;
-
     /**
      * @var bool
      */

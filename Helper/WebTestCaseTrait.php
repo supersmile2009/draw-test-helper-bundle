@@ -6,8 +6,6 @@ use Symfony\Bundle\FrameworkBundle\Client;
 
 trait WebTestCaseTrait
 {
-    use NonRebootableKernelTestTrait;
-
     /**
      * @var Client
      */
@@ -27,27 +25,13 @@ trait WebTestCaseTrait
     }
 
     /**
-     * Creates new client and stores it in static variable and in Globals.
-     * Provides the same client on each call allowing to reuse it, unless you set $reload to true to force reload new client
-     *
-     * Client's kernel reboot is disabled by default, to speed up tests.
-     *
-     * @param bool $reload - Should we reload new client?
-     * @param bool $disableReboot - Disable client's kernel reboot before each request
+     * Creates new client and stores it in static variable
      *
      * @return Client
      */
-    public static function setUpClient($reload = false, $disableReboot = true)
+    public static function setUpClient()
     {
-        if (!isset($GLOBALS['client']) || $GLOBALS['client'] === null || $reload) {
-            static::$client = static::createClient($options = [], $server = []);
-            if ($disableReboot === true) {
-                static::$client->disableReboot();
-            }
-            $GLOBALS['client'] = static::$client;
-        } else {
-            static::$client = $GLOBALS['client'];
-        }
+        static::$client = static::createClient($options = [], $server = []);
 
         return static::$client;
     }

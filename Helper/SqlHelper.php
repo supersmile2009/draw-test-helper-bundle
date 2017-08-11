@@ -74,7 +74,6 @@ class SqlHelper extends BaseRequestHelper
                 // This constant is defined in php-unit config file (e. g. phpunit.xml)
                 if (DISABLE_SQL_QUERY_CHECKS !== true) {
                     $client = $event->getRequestHelper()->getClient();
-                    $client->getKernel()->shutdown();
                     $client->getKernel()->boot();
                     $client->enableProfiler();
 
