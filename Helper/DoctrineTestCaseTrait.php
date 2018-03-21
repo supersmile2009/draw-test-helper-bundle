@@ -24,5 +24,6 @@ trait DoctrineTestCaseTrait
         }
 
         $manager->flush();
+        $manager->clear();
     }
 }
