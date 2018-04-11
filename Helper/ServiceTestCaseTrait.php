@@ -2,7 +2,7 @@
 
 namespace Draw\Bundle\DrawTestHelperBundle\Helper;
 
-use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
@@ -27,6 +27,8 @@ trait ServiceTestCaseTrait
      * it only slows the test down
      *
      * @return \Symfony\Component\HttpKernel\KernelInterface
+     *
+     * @throws \InvalidArgumentException
      */
     protected static function getSharedKernel($kernelName = 'default', $debug = false, $checkConnection = true)
     {
@@ -55,13 +57,12 @@ trait ServiceTestCaseTrait
         KernelRegistry::$kernels[$kernelName]->boot();
 
         if ($checkConnection) {
-            $doctrine = KernelRegistry::$kernels[$kernelName]->getContainer()->get("doctrine");
-            /** @var Connection $connection */
-            foreach ($doctrine->getConnections() as $connection) {
-                if (!$connection->isConnected()) {
-                    $doctrine->resetManager();
-                    break;
-                }
+            $doctrine = KernelRegistry::$kernels[$kernelName]->getContainer()->get('doctrine');
+
+            /** @var EntityManager $manager */
+            $manager = $doctrine->getManager();
+            if ($manager->isOpen() === false) {
+                $doctrine->resetManager();
             }
         }
 
