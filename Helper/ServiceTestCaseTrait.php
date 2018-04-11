@@ -80,24 +80,25 @@ trait ServiceTestCaseTrait
 
     /**
      * @param $commandName
-     * @param string $kernelName
      *
      * @return CommandHelper
+     *
+     * @throws \Symfony\Component\Console\Exception\CommandNotFoundException
      */
-    protected static function commandHelper($commandName, $kernelName = 'default')
+    protected static function commandHelper($commandName): CommandHelper
     {
-        $application = new Application($kernel = static::getSharedKernel($kernelName));
+        $kernel = self::createKernel();
+        $kernel->boot();
 
-        $container = $kernel->getContainer();
+        $application = new Application($kernel);
         foreach ($application->all() as $command) {
             if ($command instanceof ContainerAwareInterface) {
-                $command->setContainer($container);
+                $command->setContainer($kernel->getContainer());
             }
         }
+        $application->setDispatcher($kernel->getContainer()->get('event_dispatcher'));
 
-        $application->setDispatcher($container->get('event_dispatcher'));
-
-        return new CommandHelper($container, $application->find($commandName));
+        return new CommandHelper($kernel->getContainer(), $application->find($commandName));
     }
 
     /**
